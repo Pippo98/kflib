@@ -3,8 +3,6 @@
 #include <Eigen/Core>
 #include <ostream>
 
-#include "eigen/Eigen/src/Core/Matrix.h"
-
 typedef Eigen::VectorXd (*state_function_t)(const Eigen::VectorXd &state,
                                             const Eigen::VectorXd &input,
                                             void *userData);

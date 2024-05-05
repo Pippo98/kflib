@@ -3,8 +3,6 @@
 #include <ostream>
 #include <unsupported/Eigen/MatrixFunctions>
 
-#include "Eigen/src/Core/Matrix.h"
-#include "Eigen/src/Core/util/Meta.h"
 #include "ekf.hpp"
 #include "kf.hpp"
 #include "kf_base.hpp"
