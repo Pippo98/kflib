@@ -24,11 +24,11 @@ void KalmanFilterBase::setMeasurementCovariance(
   R = measurementCovariance;
 }
 
-const Eigen::VectorXd &KalmanFilterBase::getState() { return X; }
-const Eigen::MatrixXd &KalmanFilterBase::getCovariance() { return P; }
+const Eigen::VectorXd &KalmanFilterBase::getState() const { return X; }
+const Eigen::MatrixXd &KalmanFilterBase::getCovariance() const { return P; }
 
-void KalmanFilterBase::print() { printToStream(std::cout); }
-void KalmanFilterBase::printToStream(std::ostream &stream) {
+void KalmanFilterBase::print() const { printToStream(std::cout); }
+void KalmanFilterBase::printToStream(std::ostream &stream) const {
   stream << "-- STATE --\n";
   stream << X << "\n";
   stream << "-- COVARIANCE --\n";
