@@ -23,8 +23,8 @@ public:
   virtual void predict(const Eigen::VectorXd &input) = 0;
   virtual void update(const Eigen::VectorXd &measurements) = 0;
 
-  Eigen::VectorXd getState();
-  Eigen::MatrixXd getCovariance();
+  const Eigen::VectorXd &getState();
+  const Eigen::MatrixXd &getCovariance();
 
   void print();
   void printToStream(std::ostream &stream);

@@ -13,6 +13,8 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
 public:
   UnscentedKalmanFilter();
 
+  void setMerweScaledSigmaPointsParams(double alpha, double beta);
+
   void setStateUpdateFunction(state_function_t stateUpdateFunction);
   void setMeasurementFunction(measurement_function_t measurementFuction);
 

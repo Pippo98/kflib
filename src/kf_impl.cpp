@@ -24,8 +24,8 @@ void KalmanFilterBase::setMeasurementCovariance(
   R = measurementCovariance;
 }
 
-Eigen::VectorXd KalmanFilterBase::getState() { return X; }
-Eigen::MatrixXd KalmanFilterBase::getCovariance() { return P; }
+const Eigen::VectorXd &KalmanFilterBase::getState() { return X; }
+const Eigen::MatrixXd &KalmanFilterBase::getCovariance() { return P; }
 
 void KalmanFilterBase::print() { printToStream(std::cout); }
 void KalmanFilterBase::printToStream(std::ostream &stream) {
@@ -112,6 +112,12 @@ void ExtendedKalmanFilter::update(const Eigen::VectorXd &measurements) {
 UnscentedKalmanFilter::UnscentedKalmanFilter() {
   sigmaPointsAlpha = 1.0;
   sigmaPointsBeta = 2.0;
+}
+
+void UnscentedKalmanFilter::setMerweScaledSigmaPointsParams(double alpha,
+                                                            double beta) {
+  sigmaPointsAlpha = alpha;
+  sigmaPointsBeta = beta;
 }
 
 void UnscentedKalmanFilter::setStateUpdateFunction(
