@@ -129,6 +129,10 @@ void UnscentedKalmanFilter::setMeasurementFunction(
   measurementFunction = measurementFunction_;
 }
 
+const Eigen::VectorXd &UnscentedKalmanFilter::getInputs() const {
+  return inputs;
+}
+
 void UnscentedKalmanFilter::computeMerweScaledSigmaPoints(
     const Eigen::VectorXd &state, const Eigen::MatrixXd &P,
     MerweScaledSigmaPoints &outPoints) {
