@@ -5,7 +5,7 @@
 typedef Eigen::MatrixXd (*state_jacobian_function_t)(
     const Eigen::VectorXd &state, const Eigen::VectorXd &input, void *userData);
 typedef Eigen::MatrixXd (*measurement_jacobian_function_t)(
-    const Eigen::VectorXd &state, void *userData);
+    const Eigen::VectorXd &state, const Eigen::VectorXd &input, void *userData);
 
 // Extended Kalman Filter
 class ExtendedKalmanFilter : public KalmanFilterBase {
