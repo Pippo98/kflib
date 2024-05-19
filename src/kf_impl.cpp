@@ -88,15 +88,15 @@ void ExtendedKalmanFilter::setMeasurementJacobian(
 }
 void ExtendedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
   inputs = inputs_;
-  auto F = stateJacobian(X, inputs, userData);
   X = stateFunction(X, inputs, userData);
+  const auto &F = stateJacobian(X, inputs, userData);
   P = F * P * F.transpose();
   if (Q.size() != 0) {
     P += Q;
   }
 }
 void ExtendedKalmanFilter::update(const Eigen::VectorXd &measurements) {
-  auto H = measurementJacobian(measurements, inputs, userData);
+  const auto &H = measurementJacobian(measurements, inputs, userData);
   auto zEst = measurementFunction(X, inputs, userData);
   Eigen::MatrixXd S = H * P * H.transpose();
   if (R.size() != 0) {
