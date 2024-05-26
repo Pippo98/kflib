@@ -1,4 +1,5 @@
 #include <Eigen/LU>
+#include <cassert>
 #include <iostream>
 #include <ostream>
 #include <unsupported/Eigen/MatrixFunctions>
