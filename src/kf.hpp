@@ -10,6 +10,7 @@ class KalmanFilter : public KalmanFilterBase {
                               const Eigen::MatrixXd &B);
   void setMeasurementMatrix(const Eigen::MatrixXd &H);
 
+  using KalmanFilterBase::predict;
   void predict(const Eigen::VectorXd &input) override;
   void update(const Eigen::VectorXd &measurements) override;
 

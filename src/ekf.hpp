@@ -9,17 +9,18 @@ typedef Eigen::MatrixXd (*measurement_jacobian_function_t)(
 
 // Extended Kalman Filter
 class ExtendedKalmanFilter : public KalmanFilterBase {
-public:
+ public:
   void setStateUpdateFunction(state_function_t stateUpdateFunction);
   void setMeasurementFunction(measurement_function_t measurementFuction);
   void setStateJacobian(state_jacobian_function_t functionThatReturnsF);
-  void
-  setMeasurementJacobian(measurement_jacobian_function_t functionThatReturnsH);
+  void setMeasurementJacobian(
+      measurement_jacobian_function_t functionThatReturnsH);
 
+  using KalmanFilterBase::predict;
   void predict(const Eigen::VectorXd &input) override;
   void update(const Eigen::VectorXd &measurements) override;
 
-private:
+ private:
   state_function_t stateFunction;
   measurement_function_t measurementFunction;
 
