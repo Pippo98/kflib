@@ -8,6 +8,10 @@ struct MerweScaledSigmaPoints {
   Eigen::VectorXd covarianceWeights;
 };
 
+typedef Eigen::VectorXd (*constraint_function_t)(const Eigen::VectorXd &state,
+                                                 const Eigen::VectorXd &input,
+                                                 void *userData);
+
 // Unscented Kalman Filter
 class UnscentedKalmanFilter : public KalmanFilterBase {
  public:
@@ -15,7 +19,7 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
 
   const Eigen::VectorXd &getInputs() const;
 
-  void setMerweScaledSigmaPointsParams(double alpha, double beta);
+  void setMerweScaledSigmaPointsParams(double alpha, double beta, double kappa);
 
   void setStateUpdateFunction(state_function_t stateUpdateFunction);
   void setMeasurementFunction(measurement_function_t measurementFuction);
@@ -31,6 +35,8 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
                                 const Eigen::MatrixXd &additionalCovariance,
                                 Eigen::VectorXd &outX, Eigen::MatrixXd &outP);
 
+  void setStateConstraintsFunction(constraint_function_t constraintFunction);
+
  private:
   Eigen::MatrixXd computeKalmanGain(
       const MerweScaledSigmaPoints &stateSigmaPoints,
@@ -38,10 +44,12 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
       const Eigen::VectorXd &stateEstimate,
       const Eigen::VectorXd &measureEstimate,
       const Eigen::MatrixXd &measurementCovariance);
+  void constrainSigmaPoints(MerweScaledSigmaPoints &sigmaPoints);
 
  private:
   double sigmaPointsAlpha;
   double sigmaPointsBeta;
+  double sigmaPointsKappa;
 
   Eigen::VectorXd inputs;
 
@@ -49,4 +57,5 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
 
   state_function_t stateFunction;
   measurement_function_t measurementFunction;
+  constraint_function_t constraintFunction;
 };
