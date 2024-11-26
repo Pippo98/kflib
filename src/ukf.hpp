@@ -24,13 +24,14 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
   void predict(const Eigen::VectorXd &input) override;
   void update(const Eigen::VectorXd &measurements) override;
 
- private:
   void computeMerweScaledSigmaPoints(const Eigen::VectorXd &state,
                                      const Eigen::MatrixXd &P,
                                      MerweScaledSigmaPoints &outPoints);
   void computeMeanAndCovariance(const MerweScaledSigmaPoints &points,
                                 const Eigen::MatrixXd &additionalCovariance,
                                 Eigen::VectorXd &outX, Eigen::MatrixXd &outP);
+
+ private:
   Eigen::MatrixXd computeKalmanGain(
       const MerweScaledSigmaPoints &stateSigmaPoints,
       const Eigen::MatrixXd &measuresSigmas,

@@ -160,8 +160,8 @@ void UnscentedKalmanFilter::computeMerweScaledSigmaPoints(
 
   Eigen::MatrixXd U = ((n + lambda) * P).sqrt();
   for (size_t i = 0; i < n; ++i) {
-    outPoints.sigmas.col(i + 1) = state - U.col(i);
-    outPoints.sigmas.col(i + n + 1) = state + U.col(i);
+    outPoints.sigmas.col(i + 1) = state + U.col(i);
+    outPoints.sigmas.col(i + n + 1) = state - U.col(i);
   }
 }
 
@@ -172,10 +172,11 @@ void UnscentedKalmanFilter::computeMeanAndCovariance(
   outP.resize(points.sigmas.rows(), points.sigmas.rows());
   outP.setZero();
   outX = points.sigmas * points.meanWeights;
-  for (Eigen::Index i = 0; i < points.covarianceWeights.rows(); ++i) {
-    const auto y = points.sigmas.col(i) - outX;
-    outP += points.covarianceWeights(i) * (y * y.transpose());
+  auto y = points.sigmas;
+  for (Eigen::Index i = 0; i < y.cols(); i++) {
+    y.col(i) -= outX;
   }
+  outP = y * (points.covarianceWeights.asDiagonal() * y.transpose());
   if (additionalCovariance.size() != 0) {
     outP += additionalCovariance;
   }
@@ -211,13 +212,13 @@ void UnscentedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
   computeMeanAndCovariance(stateSigmaPoints, Q, X, P);
 }
 void UnscentedKalmanFilter::update(const Eigen::VectorXd &measurements) {
-  MerweScaledSigmaPoints measureSigmaPoints;
-  computeMerweScaledSigmaPoints(X, P, measureSigmaPoints);
+  MerweScaledSigmaPoints measureSigmaPoints = stateSigmaPoints;
+  // computeMerweScaledSigmaPoints(X, P, measureSigmaPoints);
   Eigen::MatrixXd measuresFromEstimate(measurements.rows(),
-                                       measureSigmaPoints.sigmas.cols());
-  for (Eigen::Index i = 0; i < measureSigmaPoints.sigmas.cols(); ++i) {
+                                       stateSigmaPoints.sigmas.cols());
+  for (Eigen::Index i = 0; i < stateSigmaPoints.sigmas.cols(); ++i) {
     measuresFromEstimate.col(i) =
-        measurementFunction(measureSigmaPoints.sigmas.col(i), inputs, userData);
+        measurementFunction(stateSigmaPoints.sigmas.col(i), inputs, userData);
   }
   measureSigmaPoints.sigmas = measuresFromEstimate;
   Eigen::VectorXd zEst;
