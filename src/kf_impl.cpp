@@ -279,10 +279,12 @@ void UnscentedKalmanFilter::RTSSmoother(
   SigmaPoints sigmaPredicted(n, 2 * n + 1);
   for (int i = xIn.size() - 2; i >= 0; i--) {
     computeMerweScaledSigmaPoints(xSmooth[i], pSmooth[i], sigma);
+    constrainSigmaPoints(sigma);
 
     for (int s = 0; s < sigma.cols(); s++) {
       sigmaPredicted.col(s) = stateFunction(sigma.col(s), inputs[i], userData);
     }
+    constrainSigmaPoints(sigmaPredicted);
 
     computeMeanAndCovariance(sigmaPredicted, Q, xb, Pb);
 
@@ -291,5 +293,9 @@ void UnscentedKalmanFilter::RTSSmoother(
 
     xSmooth[i] += K * (xSmooth[i + 1] - xb);
     pSmooth[i] += K * (pSmooth[i + 1] - Pb) * K.transpose();
+
+    if (constraintFunction) {
+      xSmooth[i] = constraintFunction(xSmooth[i], inputs[i], userData);
+    }
   }
 }
