@@ -258,3 +258,33 @@ void UnscentedKalmanFilter::update(const Eigen::VectorXd &measurements) {
     X = constraintFunction(X, inputs, userData);
   }
 }
+
+void UnscentedKalmanFilter::RTSSmoother(
+    std::vector<Eigen::VectorXd> &xSmooth,
+    std::vector<Eigen::MatrixXd> &pSmooth,
+    const std::vector<Eigen::VectorXd> &inputs) {
+  std::vector<Eigen::VectorXd> xIn = xSmooth;
+  std::vector<Eigen::MatrixXd> PIn = pSmooth;
+
+  Eigen::VectorXd xb;
+  Eigen::MatrixXd Pb;
+  MerweScaledSigmaPoints sigma;
+  MerweScaledSigmaPoints sigmaPredicted;
+  for (int i = xIn.size() - 2; i >= 0; i--) {
+    computeMerweScaledSigmaPoints(xSmooth[i], pSmooth[i], sigma);
+    sigmaPredicted = sigma;
+
+    for (int s = 0; s < sigma.sigmas.cols(); s++) {
+      sigmaPredicted.sigmas.col(s) =
+          stateFunction(sigma.sigmas.col(s), inputs[i], userData);
+    }
+
+    computeMeanAndCovariance(sigmaPredicted, Q, xb, Pb);
+
+    Eigen::MatrixXd K =
+        computeKalmanGain(sigma, sigmaPredicted.sigmas, xIn[i], xb, Pb);
+
+    xSmooth[i] += K * (xSmooth[i + 1] - xb);
+    pSmooth[i] += K * (pSmooth[i + 1] - Pb) * K.transpose();
+  }
+}

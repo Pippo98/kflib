@@ -37,6 +37,10 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
 
   void setStateConstraintsFunction(constraint_function_t constraintFunction);
 
+  void RTSSmoother(std::vector<Eigen::VectorXd> &states,
+                   std::vector<Eigen::MatrixXd> &covariances,
+                   const std::vector<Eigen::VectorXd> &inputs);
+
  private:
   Eigen::MatrixXd computeKalmanGain(
       const MerweScaledSigmaPoints &stateSigmaPoints,
