@@ -2,12 +2,17 @@
 
 #include "kf_base.hpp"
 
-struct MerweScaledSigmaPoints {
-  Eigen::MatrixXd sigmas;
+struct MerweScaledSigmaPointsParams {
+  double alpha;
+  double beta;
+  double kappa;
+
+  double lambda;
   Eigen::VectorXd meanWeights;
   Eigen::VectorXd covarianceWeights;
 };
 
+typedef Eigen::MatrixXd SigmaPoints;
 typedef Eigen::VectorXd (*constraint_function_t)(const Eigen::VectorXd &state,
                                                  const Eigen::VectorXd &input,
                                                  void *userData);
@@ -28,10 +33,12 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
   void predict(const Eigen::VectorXd &input) override;
   void update(const Eigen::VectorXd &measurements) override;
 
+  void computeMerweScaledSigmaPointsWeights(
+      MerweScaledSigmaPointsParams &params);
   void computeMerweScaledSigmaPoints(const Eigen::VectorXd &state,
                                      const Eigen::MatrixXd &P,
-                                     MerweScaledSigmaPoints &outPoints);
-  void computeMeanAndCovariance(const MerweScaledSigmaPoints &points,
+                                     SigmaPoints &outPoints);
+  void computeMeanAndCovariance(const SigmaPoints &points,
                                 const Eigen::MatrixXd &additionalCovariance,
                                 Eigen::VectorXd &outX, Eigen::MatrixXd &outP);
 
@@ -43,21 +50,18 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
 
  private:
   Eigen::MatrixXd computeKalmanGain(
-      const MerweScaledSigmaPoints &stateSigmaPoints,
+      const SigmaPoints &stateSigmaPoints,
       const Eigen::MatrixXd &measuresSigmas,
       const Eigen::VectorXd &stateEstimate,
       const Eigen::VectorXd &measureEstimate,
       const Eigen::MatrixXd &measurementCovariance);
-  void constrainSigmaPoints(MerweScaledSigmaPoints &sigmaPoints);
+  void constrainSigmaPoints(SigmaPoints &sigmaPoints);
 
  private:
-  double sigmaPointsAlpha;
-  double sigmaPointsBeta;
-  double sigmaPointsKappa;
+  MerweScaledSigmaPointsParams sigmaParams;
 
   Eigen::VectorXd inputs;
-
-  MerweScaledSigmaPoints stateSigmaPoints;
+  SigmaPoints stateSigmaPoints;
 
   state_function_t stateFunction;
   measurement_function_t measurementFunction;
