@@ -28,6 +28,10 @@ void KalmanFilterBase::setMeasurementCovariance(
 const Eigen::VectorXd &KalmanFilterBase::getState() const { return X; }
 const Eigen::MatrixXd &KalmanFilterBase::getCovariance() const { return P; }
 
+const Eigen::VectorXd &KalmanFilterBase::getInputs() const {
+  return U;
+}
+
 void KalmanFilterBase::print() const { printToStream(std::cout); }
 void KalmanFilterBase::printToStream(std::ostream &stream) const {
   stream << "-- STATE --\n";
@@ -88,23 +92,23 @@ void ExtendedKalmanFilter::setMeasurementJacobian(
   measurementJacobian = functionThatReturnsH_;
 }
 void ExtendedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
-  inputs = inputs_;
-  const auto &F = stateJacobian(X, inputs, userData);
-  X = stateFunction(X, inputs, userData);
+  U = inputs_;
+  const auto &F = stateJacobian(X, U, userData);
+  X = stateFunction(X, U, userData);
   P = F * P * F.transpose();
   if (Q.size() != 0) {
     P += Q;
   }
 }
 void ExtendedKalmanFilter::update(const Eigen::VectorXd &measurements) {
-  const auto &H = measurementJacobian(measurements, inputs, userData);
+  const auto &H = measurementJacobian(measurements, U, userData);
   Eigen::MatrixXd S = H * P * H.transpose();
   if (R.size() != 0) {
     S += R;
   }
   auto K = P * H.transpose() * S.inverse();
 
-  auto zEst = measurementFunction(X, inputs, userData);
+  auto zEst = measurementFunction(X, U, userData);
   X = X + K * (measurements - zEst);
 
   Eigen::MatrixXd I(X.rows(), X.rows());
@@ -140,10 +144,6 @@ void UnscentedKalmanFilter::setMeasurementFunction(
 void UnscentedKalmanFilter::setStateConstraintsFunction(
     constraint_function_t constraintFunction_) {
   constraintFunction = constraintFunction_;
-}
-
-const Eigen::VectorXd &UnscentedKalmanFilter::getInputs() const {
-  return inputs;
 }
 
 void UnscentedKalmanFilter::computeMerweScaledSigmaPointsWeights(
@@ -242,7 +242,7 @@ void UnscentedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
 }
 void UnscentedKalmanFilter::update(const Eigen::VectorXd &measurements) {
   SigmaPoints measureSigmaPoints = stateSigmaPoints;
-  // computeMerweScaledSigmaPoints(X, P, measureSigmaPoints);
+  computeMerweScaledSigmaPoints(X, P, measureSigmaPoints);
   Eigen::MatrixXd measuresFromEstimate(measurements.rows(),
                                        stateSigmaPoints.cols());
   for (Eigen::Index i = 0; i < stateSigmaPoints.cols(); ++i) {

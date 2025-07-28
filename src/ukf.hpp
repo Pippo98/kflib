@@ -22,8 +22,6 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
  public:
   UnscentedKalmanFilter();
 
-  const Eigen::VectorXd &getInputs() const;
-
   void setMerweScaledSigmaPointsParams(double alpha, double beta, double kappa);
 
   void setStateUpdateFunction(state_function_t stateUpdateFunction);

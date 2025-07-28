@@ -24,8 +24,6 @@ class ExtendedKalmanFilter : public KalmanFilterBase {
   state_function_t stateFunction;
   measurement_function_t measurementFunction;
 
-  Eigen::VectorXd inputs;
-
   state_jacobian_function_t stateJacobian;
   measurement_jacobian_function_t measurementJacobian;
 };

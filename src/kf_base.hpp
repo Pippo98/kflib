@@ -25,6 +25,7 @@ class KalmanFilterBase {
 
   const Eigen::VectorXd &getState() const;
   const Eigen::MatrixXd &getCovariance() const;
+  const Eigen::VectorXd &getInputs() const;
 
   void print() const;
   void printToStream(std::ostream &stream) const;
@@ -33,6 +34,7 @@ class KalmanFilterBase {
   void *userData;
 
   Eigen::VectorXd X;  // State
+  Eigen::VectorXd U;  // Inputs
   Eigen::MatrixXd P;  // State covariance
   Eigen::MatrixXd Q;  // Process covariance
   Eigen::MatrixXd R;  // Measurement covariance
