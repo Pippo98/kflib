@@ -28,9 +28,7 @@ void KalmanFilterBase::setMeasurementCovariance(
 const Eigen::VectorXd &KalmanFilterBase::getState() const { return X; }
 const Eigen::MatrixXd &KalmanFilterBase::getCovariance() const { return P; }
 
-const Eigen::VectorXd &KalmanFilterBase::getInputs() const {
-  return U;
-}
+const Eigen::VectorXd &KalmanFilterBase::getInputs() const { return U; }
 
 void KalmanFilterBase::print() const { printToStream(std::cout); }
 void KalmanFilterBase::printToStream(std::ostream &stream) const {
@@ -141,6 +139,12 @@ void UnscentedKalmanFilter::setMeasurementFunction(
   measurementFunction = measurementFunction_;
 }
 
+void UnscentedKalmanFilter::enableBatchMode() { useBatchMode = true; }
+void UnscentedKalmanFilter::disableBatchMode() { useBatchMode = false; }
+void UnscentedKalmanFilter::setStateUpdateFunctionBatch(state_function_batch_t stateFunction_) {
+	stateFunctionBatch = stateFunction_;
+}
+
 void UnscentedKalmanFilter::setStateConstraintsFunction(
     constraint_function_t constraintFunction_) {
   constraintFunction = constraintFunction_;
@@ -214,7 +218,7 @@ Eigen::MatrixXd UnscentedKalmanFilter::computeKalmanGain(
     const Eigen::MatrixXd &measureSigmaPoints,
     const Eigen::VectorXd &stateEstimate,
     const Eigen::VectorXd &measureEstimate,
-    const Eigen::MatrixXd &measurementCovariance) {
+    const Eigen::MatrixXd &measurementCovariance) const {
   size_t n = X.rows();
   size_t m = measureEstimate.rows();
   size_t nSigmas = stateSigmaPoints.cols();
@@ -233,9 +237,13 @@ void UnscentedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
   inputs = inputs_;
   computeMerweScaledSigmaPoints(X, P, stateSigmaPoints);
   constrainSigmaPoints(stateSigmaPoints);
-  for (Eigen::Index i = 0; i < stateSigmaPoints.cols(); ++i) {
-    stateSigmaPoints.col(i) =
-        stateFunction(stateSigmaPoints.col(i), inputs, userData);
+  if (useBatchMode) {
+    stateSigmaPoints = stateFunctionBatch(stateSigmaPoints, inputs, userData);
+  } else {
+    for (Eigen::Index i = 0; i < stateSigmaPoints.cols(); ++i) {
+      stateSigmaPoints.col(i) =
+          stateFunction(stateSigmaPoints.col(i), inputs, userData);
+    }
   }
   constrainSigmaPoints(stateSigmaPoints);
   computeMeanAndCovariance(stateSigmaPoints, Q, X, P);
@@ -281,9 +289,13 @@ void UnscentedKalmanFilter::RTSSmoother(
     computeMerweScaledSigmaPoints(xSmooth[i], pSmooth[i], sigma);
     constrainSigmaPoints(sigma);
 
-    for (int s = 0; s < sigma.cols(); s++) {
-      sigmaPredicted.col(s) = stateFunction(sigma.col(s), inputs[i], userData);
-    }
+		if (useBatchMode) {
+			sigmaPredicted = stateFunctionBatch(sigma, inputs[i], userData);
+		} else {
+			for (int s = 0; s < sigma.cols(); s++) {
+				sigmaPredicted.col(s) = stateFunction(sigma.col(s), inputs[i], userData);
+			}
+		}
     constrainSigmaPoints(sigmaPredicted);
 
     computeMeanAndCovariance(sigmaPredicted, Q, xb, Pb);
