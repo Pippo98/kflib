@@ -3,7 +3,10 @@ project(KF)
 
 set(DIR ${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(eigen)
+if(NOT TARGET Eigen3::Eigen)
+    add_subdirectory(${DIR}/eigen)
+endif()
+
 include_directories(
     ${DIR}
     ${DIR}/eigen
