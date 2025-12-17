@@ -141,8 +141,9 @@ void UnscentedKalmanFilter::setMeasurementFunction(
 
 void UnscentedKalmanFilter::enableBatchMode() { useBatchMode = true; }
 void UnscentedKalmanFilter::disableBatchMode() { useBatchMode = false; }
-void UnscentedKalmanFilter::setStateUpdateFunctionBatch(state_function_batch_t stateFunction_) {
-	stateFunctionBatch = stateFunction_;
+void UnscentedKalmanFilter::setStateUpdateFunctionBatch(
+    state_function_batch_t stateFunction_) {
+  stateFunctionBatch = stateFunction_;
 }
 
 void UnscentedKalmanFilter::setStateConstraintsFunction(
@@ -181,7 +182,7 @@ void UnscentedKalmanFilter::computeMerweScaledSigmaPoints(
 
   outPoints.col(0) = state;
 
-  Eigen::MatrixXd U = ((n + sigmaParams.lambda) * P).sqrt();
+  Eigen::MatrixXd U = ((n + sigmaParams.lambda) * P).llt().matrixL();
   for (size_t i = 0; i < n; ++i) {
     outPoints.col(i + 1) = state + U.col(i);
     outPoints.col(i + n + 1) = state - U.col(i);
@@ -289,13 +290,14 @@ void UnscentedKalmanFilter::RTSSmoother(
     computeMerweScaledSigmaPoints(xSmooth[i], pSmooth[i], sigma);
     constrainSigmaPoints(sigma);
 
-		if (useBatchMode) {
-			sigmaPredicted = stateFunctionBatch(sigma, inputs[i], userData);
-		} else {
-			for (int s = 0; s < sigma.cols(); s++) {
-				sigmaPredicted.col(s) = stateFunction(sigma.col(s), inputs[i], userData);
-			}
-		}
+    if (useBatchMode) {
+      sigmaPredicted = stateFunctionBatch(sigma, inputs[i], userData);
+    } else {
+      for (int s = 0; s < sigma.cols(); s++) {
+        sigmaPredicted.col(s) =
+            stateFunction(sigma.col(s), inputs[i], userData);
+      }
+    }
     constrainSigmaPoints(sigmaPredicted);
 
     computeMeanAndCovariance(sigmaPredicted, Q, xb, Pb);
