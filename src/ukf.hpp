@@ -26,6 +26,7 @@ class UnscentedKalmanFilter : public KalmanFilterBase {
 public:
   UnscentedKalmanFilter();
 
+  // Kappa should be number of states - 3 for typical UKF behavior
   void setMerweScaledSigmaPointsParams(double alpha, double beta, double kappa);
 
   void setStateUpdateFunction(state_function_t stateUpdateFunction);
