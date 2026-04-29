@@ -99,7 +99,7 @@ void ExtendedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
   }
 }
 void ExtendedKalmanFilter::update(const Eigen::VectorXd &measurements) {
-  const auto &H = measurementJacobian(measurements, U, userData);
+  const auto &H = measurementJacobian(X, U, userData);
   Eigen::MatrixXd S = H * P * H.transpose();
   if (R.size() != 0) {
     S += R;
@@ -115,7 +115,7 @@ void ExtendedKalmanFilter::update(const Eigen::VectorXd &measurements) {
 }
 
 UnscentedKalmanFilter::UnscentedKalmanFilter() {
-  setMerweScaledSigmaPointsParams(1.0, 2.0, 0.0);
+  setMerweScaledSigmaPointsParams(0.01, 2.0, 0.0);
   stateFunction = nullptr;
   measurementFunction = nullptr;
   constraintFunction = nullptr;
