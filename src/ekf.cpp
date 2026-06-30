@@ -1,6 +1,7 @@
 #include "kflib/ekf.hpp"
 
 #include <Eigen/LU>
+#include <Eigen/Cholesky>
 
 void ExtendedKalmanFilter::setStateUpdateFunction(
     state_function_t stateFunction_) {
@@ -33,7 +34,8 @@ void ExtendedKalmanFilter::update(const Eigen::VectorXd &measurements) {
   if (R.size() != 0) {
     S += R;
   }
-  auto K = P * H.transpose() * S.inverse();
+  auto K = P * H.transpose() * S.ldlt().solve(
+    Eigen::MatrixXd::Identity(S.rows(), S.cols()));
 
   auto zEst = measurementFunction(X, U, userData);
   X = X + K * (measurements - zEst);

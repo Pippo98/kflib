@@ -124,7 +124,9 @@ Eigen::MatrixXd UnscentedKalmanFilter::computeKalmanGain(
         ((stateSigmaPoints.col(i) - stateEstimate) *
          (measureSigmaPoints.col(i) - measureEstimate).transpose());
   }
-  return crossCovariance * measurementCovariance.inverse();
+  return crossCovariance * measurementCovariance.ldlt().solve(
+    Eigen::MatrixXd::Identity(measurementCovariance.rows(),
+    measurementCovariance.cols()));
 }
 void UnscentedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
   inputs = inputs_;

@@ -1,6 +1,7 @@
 #include "kflib/kf.hpp"
 
 #include <Eigen/LU>
+#include <Eigen/Cholesky>
 
 void KalmanFilter::setStateUpdateMatrix(const Eigen::MatrixXd &A_) {
   A = A_;
@@ -29,7 +30,8 @@ void KalmanFilter::update(const Eigen::VectorXd &measurements) {
   if (R.size() != 0) {
     S += R;
   }
-  auto K = P * H.transpose() * S.inverse();
+  auto K = P * H.transpose() * S.ldlt().solve(
+    Eigen::MatrixXd::Identity(S.rows(), S.cols()));
   X = X + K * (measurements - H * X);
   Eigen::MatrixXd I(X.rows(), X.rows());
   I.setIdentity();
