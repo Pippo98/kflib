@@ -2,7 +2,6 @@
 
 #include "kf_base.hpp"
 
-// Linear Kalman Filter
 class KalmanFilter : public KalmanFilterBase {
  public:
   void setStateUpdateMatrix(const Eigen::MatrixXd &A);

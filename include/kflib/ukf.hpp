@@ -32,8 +32,8 @@ public:
   void setStateUpdateFunction(state_function_t stateUpdateFunction);
   void setMeasurementFunction(measurement_function_t measurementFuction);
 
-	void enableBatchMode();
-	void disableBatchMode();
+  void enableBatchMode();
+  void disableBatchMode();
   void setStateUpdateFunctionBatch(state_function_batch_t stateUpdateFunction);
 
   using KalmanFilterBase::predict;
@@ -74,6 +74,6 @@ private:
   measurement_function_t measurementFunction;
   constraint_function_t constraintFunction;
 
-	bool useBatchMode = false;
-	state_function_batch_t stateFunctionBatch;
+  bool useBatchMode = false;
+  state_function_batch_t stateFunctionBatch;
 };

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "kf_base.hpp"
+#include "kflib/kf_base.hpp"
 
 typedef Eigen::MatrixXd (*state_jacobian_function_t)(
     const Eigen::VectorXd &state, const Eigen::VectorXd &input, void *userData);
 typedef Eigen::MatrixXd (*measurement_jacobian_function_t)(
     const Eigen::VectorXd &state, const Eigen::VectorXd &input, void *userData);
 
-// Extended Kalman Filter
 class ExtendedKalmanFilter : public KalmanFilterBase {
  public:
   void setStateUpdateFunction(state_function_t stateUpdateFunction);

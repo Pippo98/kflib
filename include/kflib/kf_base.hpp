@@ -11,7 +11,7 @@ typedef Eigen::VectorXd (*measurement_function_t)(const Eigen::VectorXd &state,
                                                   void *userData);
 
 class KalmanFilterBase {
- public:
+public:
   void setUserData(void *data);
 
   void setState(const Eigen::VectorXd &state);
@@ -30,12 +30,12 @@ class KalmanFilterBase {
   void print() const;
   void printToStream(std::ostream &stream) const;
 
- protected:
+protected:
   void *userData;
 
-  Eigen::VectorXd X;  // State
-  Eigen::VectorXd U;  // Inputs
-  Eigen::MatrixXd P;  // State covariance
-  Eigen::MatrixXd Q;  // Process covariance
-  Eigen::MatrixXd R;  // Measurement covariance
+  Eigen::VectorXd X; // State
+  Eigen::VectorXd U; // Inputs
+  Eigen::MatrixXd P; // State covariance
+  Eigen::MatrixXd Q; // Process covariance
+  Eigen::MatrixXd R; // Measurement covariance
 };
