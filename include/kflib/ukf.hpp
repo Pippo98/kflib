@@ -15,7 +15,12 @@
  *   states, covariances and inputs in post-processing.
  */
 
-/** Parameters for Merwe's scaled sigma points. */
+/**
+ * @brief Parameters for Merwe-scaled sigma point.
+ * @param alpha Spread of the sigma points.
+ * @param beta Prior knowledge about the distribution (2 is optimal for Gaussian).
+ * @param kappa Secondary scaling parameter (often n - 3).
+ */
 struct MerweScaledSigmaPointsParams {
   double alpha;
   double beta;
@@ -59,6 +64,7 @@ public:
    * @param kappa Secondary scaling parameter (often n - 3).
    */
   void setMerweScaledSigmaPointsParams(double alpha, double beta, double kappa);
+  void setMerweScaledSigmaPointsParams(MerweScaledSigmaPointsParams params);
 
   /** Set the scalar (per-sigma) state update function f(x,u). */
   void setStateUpdateFunction(state_function_t stateUpdateFunction);

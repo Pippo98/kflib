@@ -34,3 +34,12 @@ target_link_libraries(kflib_shared PUBLIC Eigen3::Eigen)
 
 target_precompile_headers(kflib_static PRIVATE <Eigen/Core>)
 target_precompile_headers(kflib_shared PRIVATE <Eigen/Core>)
+
+if(KFLIB_BUILD_EXAMPLES)
+add_executable(example_kf ${DIR}/examples/example_kf.cpp)
+target_link_libraries(example_kf PRIVATE kflib_static)
+add_executable(example_ekf ${DIR}/examples/example_ekf.cpp)
+target_link_libraries(example_ekf PRIVATE kflib_static)
+add_executable(example_ukf ${DIR}/examples/example_ukf.cpp)
+target_link_libraries(example_ukf PRIVATE kflib_static)
+endif()

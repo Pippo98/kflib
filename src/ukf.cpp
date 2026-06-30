@@ -18,6 +18,9 @@ void UnscentedKalmanFilter::setMerweScaledSigmaPointsParams(double alpha,
   sigmaParams.kappa = kappa;
   computeMerweScaledSigmaPointsWeights(sigmaParams);
 }
+void UnscentedKalmanFilter::setMerweScaledSigmaPointsParams(MerweScaledSigmaPointsParams _params) {
+  setMerweScaledSigmaPointsParams(_params.alpha, _params.beta, _params.kappa);
+}
 
 void UnscentedKalmanFilter::setStateUpdateFunction(
     state_function_t stateFunction_) {
