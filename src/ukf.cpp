@@ -4,7 +4,7 @@
 #include <Eigen/LU>
 
 UnscentedKalmanFilter::UnscentedKalmanFilter() {
-  setMerweScaledSigmaPointsParams(0.01, 2.0, 0.0);
+  setMerweScaledSigmaPointsParams(0.001, 2.0, 0.0);
   stateFunction = nullptr;
   measurementFunction = nullptr;
   constraintFunction = nullptr;
@@ -18,7 +18,8 @@ void UnscentedKalmanFilter::setMerweScaledSigmaPointsParams(double alpha,
   sigmaParams.kappa = kappa;
   computeMerweScaledSigmaPointsWeights(sigmaParams);
 }
-void UnscentedKalmanFilter::setMerweScaledSigmaPointsParams(MerweScaledSigmaPointsParams _params) {
+void UnscentedKalmanFilter::setMerweScaledSigmaPointsParams(
+    MerweScaledSigmaPointsParams _params) {
   setMerweScaledSigmaPointsParams(_params.alpha, _params.beta, _params.kappa);
 }
 
@@ -36,6 +37,10 @@ void UnscentedKalmanFilter::disableBatchMode() { useBatchMode = false; }
 void UnscentedKalmanFilter::setStateUpdateFunctionBatch(
     state_function_batch_t stateFunction_) {
   stateFunctionBatch = stateFunction_;
+}
+void UnscentedKalmanFilter::setMeasurementFunctionBatch(
+    measurement_function_batch_t measurementFunctionBatch_) {
+  measurementFunctionBatch = measurementFunctionBatch_;
 }
 
 void UnscentedKalmanFilter::setStateConstraintsFunction(
@@ -124,9 +129,9 @@ Eigen::MatrixXd UnscentedKalmanFilter::computeKalmanGain(
         ((stateSigmaPoints.col(i) - stateEstimate) *
          (measureSigmaPoints.col(i) - measureEstimate).transpose());
   }
-  return crossCovariance * measurementCovariance.ldlt().solve(
-    Eigen::MatrixXd::Identity(measurementCovariance.rows(),
-    measurementCovariance.cols()));
+  return crossCovariance *
+         measurementCovariance.ldlt().solve(Eigen::MatrixXd::Identity(
+             measurementCovariance.rows(), measurementCovariance.cols()));
 }
 void UnscentedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
   inputs = inputs_;
@@ -145,12 +150,16 @@ void UnscentedKalmanFilter::predict(const Eigen::VectorXd &inputs_) {
 }
 void UnscentedKalmanFilter::update(const Eigen::VectorXd &measurements) {
   SigmaPoints measureSigmaPoints = stateSigmaPoints;
-  computeMerweScaledSigmaPoints(X, P, measureSigmaPoints);
   Eigen::MatrixXd measuresFromEstimate(measurements.rows(),
-                                       stateSigmaPoints.cols());
-  for (Eigen::Index i = 0; i < stateSigmaPoints.cols(); ++i) {
-    measuresFromEstimate.col(i) =
-        measurementFunction(stateSigmaPoints.col(i), inputs, userData);
+                                       measureSigmaPoints.cols());
+  if (useBatchMode) {
+    measuresFromEstimate =
+        measurementFunctionBatch(measureSigmaPoints, inputs, userData);
+  } else {
+    for (Eigen::Index i = 0; i < stateSigmaPoints.cols(); ++i) {
+      measuresFromEstimate.col(i) =
+          measurementFunction(measureSigmaPoints.col(i), inputs, userData);
+    }
   }
   measureSigmaPoints = measuresFromEstimate;
 

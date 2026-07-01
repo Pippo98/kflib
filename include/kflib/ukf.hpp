@@ -18,7 +18,8 @@
 /**
  * @brief Parameters for Merwe-scaled sigma point.
  * @param alpha Spread of the sigma points.
- * @param beta Prior knowledge about the distribution (2 is optimal for Gaussian).
+ * @param beta Prior knowledge about the distribution (2 is optimal for
+ * Gaussian).
  * @param kappa Secondary scaling parameter (often n - 3).
  */
 struct MerweScaledSigmaPointsParams {
@@ -46,6 +47,12 @@ typedef Eigen::VectorXd (*constraint_function_t)(const Eigen::VectorXd &state,
 typedef Eigen::MatrixXd (*state_function_batch_t)(const Eigen::MatrixXd &state,
                                                   const Eigen::VectorXd &input,
                                                   void *userData);
+/**
+ * Batch measurement function signature: receives a matrix whose columns are the
+ * sigma points. Returns a matrix with the measurements estimates.
+ */
+typedef Eigen::MatrixXd (*measurement_function_batch_t)(
+    const Eigen::MatrixXd &state, const Eigen::VectorXd &input, void *userData);
 
 /**
  * @brief Unscented Kalman Filter implementation.
@@ -60,7 +67,8 @@ public:
   /**
    * @brief Configure Merwe-scaled sigma point parameters.
    * @param alpha Spread of the sigma points.
-   * @param beta Prior knowledge about the distribution (2 is optimal for Gaussian).
+   * @param beta Prior knowledge about the distribution (2 is optimal for
+   * Gaussian).
    * @param kappa Secondary scaling parameter (often n - 3).
    */
   void setMerweScaledSigmaPointsParams(double alpha, double beta, double kappa);
@@ -71,24 +79,29 @@ public:
   /** Set the scalar measurement function h(x,u). */
   void setMeasurementFunction(measurement_function_t measurementFuction);
 
-  /** Enable processing where the state function is called with all sigma points at once. */
+  /** Enable processing where the state function is called with all sigma points
+   * at once. */
   void enableBatchMode();
   /** Disable batch mode (default behavior: single-column processing). */
   void disableBatchMode();
   /** Set a batch-style state update function that accepts all sigma points. */
   void setStateUpdateFunctionBatch(state_function_batch_t stateUpdateFunction);
+  void
+  setMeasurementFunctionBatch(measurement_function_batch_t measurementFunction);
 
   using KalmanFilterBase::predict;
   void predict(const Eigen::VectorXd &input) override;
   void update(const Eigen::VectorXd &measurements) override;
 
   /** Compute Merwe weights and populate `params`. */
-  void computeMerweScaledSigmaPointsWeights(MerweScaledSigmaPointsParams &params);
+  void
+  computeMerweScaledSigmaPointsWeights(MerweScaledSigmaPointsParams &params);
   /** Generate sigma points from `state` and covariance `P`. */
   void computeMerweScaledSigmaPoints(const Eigen::VectorXd &state,
                                      const Eigen::MatrixXd &P,
                                      SigmaPoints &outPoints);
-  /** Compute mean and covariance from sigma `points` and add extra covariance. */
+  /** Compute mean and covariance from sigma `points` and add extra covariance.
+   */
   void computeMeanAndCovariance(const SigmaPoints &points,
                                 const Eigen::MatrixXd &additionalCovariance,
                                 Eigen::VectorXd &outX, Eigen::MatrixXd &outP);
@@ -127,4 +140,5 @@ private:
 
   bool useBatchMode = false;
   state_function_batch_t stateFunctionBatch;
+  measurement_function_batch_t measurementFunctionBatch;
 };

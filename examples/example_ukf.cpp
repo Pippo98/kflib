@@ -46,10 +46,25 @@ Eigen::VectorXd turn_model_state_func(const Eigen::VectorXd &state, const Eigen:
   return next_state;
 }
 
+Eigen::MatrixXd turn_model_state_func_batch(const Eigen::MatrixXd &state, const Eigen::VectorXd &input, void *userData) {
+  Eigen::MatrixXd states(state.rows(), state.cols());
+  for (int col = 0; col < state.cols(); col++) {
+    states.col(col) = turn_model_state_func(state.col(col), input, userData);
+  }
+  return states;
+}
+
 // Measurement function: position [x; y]
 Eigen::VectorXd turn_model_measurement_func(const Eigen::VectorXd &state, const Eigen::VectorXd &input, void *userData) {
   Eigen::VectorXd meas(2);
   meas << state(IDX_X), state(IDX_Y);
+  return meas;
+}
+Eigen::MatrixXd turn_model_measurement_func_batch(const Eigen::MatrixXd &state, const Eigen::VectorXd &input, void *userData) {
+  Eigen::MatrixXd meas(2, state.cols());
+  for (int col = 0; col < state.cols(); col++) {
+    meas.col(col) = turn_model_measurement_func(state.col(col), input, userData);
+  }
   return meas;
 }
 
@@ -68,6 +83,11 @@ int main() {
   // Set state and measurement functions
   ukf.setStateUpdateFunction(turn_model_state_func);
   ukf.setMeasurementFunction(turn_model_measurement_func);
+  // Batch mode
+  ukf.setStateUpdateFunctionBatch(turn_model_state_func_batch);
+  ukf.setMeasurementFunctionBatch(turn_model_measurement_func_batch);
+
+  // ukf.enableBatchMode();
 
   // Set default sigma points parameters (can be customized)
   MerweScaledSigmaPointsParams params;
